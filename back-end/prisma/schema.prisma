@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TenantStatus {
+  ACTIVE
+  INACTIVE
+  TRIAL
+  SUSPENDED
+}
+
+enum UserRole {
+  SUPERVISOR
+  COLLABORATOR
+}
+
+enum OsStatus {
+  CLOSED
+  IN_PROGRESS
+  CANCELLED
+}
+
+enum OsStageStatus {
+  OPEN
+  COMPLETED
+  REJECTED
+}
+
+model Tenant {
+  id         String       @id @default(cuid())
+  name       String       @unique
+  email      String       @unique
+  status     TenantStatus
+  trialEndAt DateTime
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  users     Users[]
+  os        Os[]
+  osStages  OsStage[]
+  customers Customer[]
+}
+
+model Users {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenantId  String
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  responsibleOs Os[] @relation("OsResponsible")
+  os            Os[] @relation("OsUsers")
+}
+
+model Os {
+  id            String @id @default(cuid())
+  customerId    String
+  tenantId      String
+  responsibleId String
+
+  name        String
+  description String
+  amountCents Int
+  status      OsStatus
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+  cancelledAt DateTime?
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  responsible Users   @relation("OsResponsible", fields: [responsibleId], references: [id], onDelete: Cascade)
+  users       Users[] @relation("OsUsers")
+
+  osStages OsStage[]
+}
+
+model OsStage {
+  id          String        @id @default(cuid())
+  osId        String
+  tenantId    String
+  name        String
+  description String
+  status      OsStageStatus
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  approvedBy String?
+  approvedAt DateTime?
+  rejectedBy String?
+  rejectedAt DateTime?
+
+  os     Os     @relation(fields: [osId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model Customer {
+  id       String @id @default(cuid())
+  tenantId String
+  name     String
+  email    String @unique
+  document String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  os Os[]
+}
