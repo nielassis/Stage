@@ -1,5 +1,6 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma';
-import { Prisma } from '../../generated/prisma/client';
+
 import { Permissions } from '../../lib/permissions';
 import { TenantContext } from '../../types/context';
 import { cleanString, normalizeEmail } from '../../utils/cleaners';

@@ -1,5 +1,5 @@
 import { prisma } from '../../config/prisma';
-import { OsStageStatus } from '../../generated/prisma/enums';
+import { OsStageStatus } from '@prisma/client';
 import { Permissions } from '../../lib/permissions';
 import { TenantContext } from '../../types/context';
 import { cleanString } from '../../utils/cleaners';

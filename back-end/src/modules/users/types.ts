@@ -1,5 +1,4 @@
-import { User } from '../../generated/prisma/client';
-import { UserRole } from '../../generated/prisma/enums';
+import { User, UserRole } from '@prisma/client';
 import { PageResult, PaginationMetadata } from '../../types/pagination';
 
 export type CreateUserDTO = {

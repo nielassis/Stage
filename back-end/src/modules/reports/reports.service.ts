@@ -1,5 +1,5 @@
 import { prisma } from '../../config/prisma';
-import { Prisma, OsStatus, OsStageStatus } from '../../generated/prisma/client';
+import { Prisma, OsStatus } from '@prisma/client';
 import { Permissions } from '../../lib/permissions';
 import { TenantContext } from '../../types/context';
 import { DateRangeQuery } from './types';

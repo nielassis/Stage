@@ -11,7 +11,7 @@ import {
 } from './types';
 import { generateRandomPassword } from '../../utils/generateRandomPassword';
 import bcrypt from 'bcrypt';
-import { Prisma } from '../../generated/prisma/client';
+import { Prisma } from '@prisma/client';
 import { passwordSchema } from '../../schemas/validPasswordSchema';
 
 export async function createUser(context: TenantContext, dto: CreateUserDTO) {

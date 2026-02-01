@@ -1,4 +1,4 @@
-import { DocumentType } from '../generated/prisma/enums';
+import { DocumentType } from '@prisma/client';
 
 export function cleanString(value?: string | null): string | undefined {
   if (!value) return undefined;

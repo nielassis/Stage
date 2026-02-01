@@ -1,8 +1,4 @@
-import {
-  OsStatus,
-  OsStageStatus,
-  UserRole,
-} from '../../generated/prisma/client';
+import { OsStatus, OsStageStatus } from '@prisma/client';
 
 /* =======================
    BASE

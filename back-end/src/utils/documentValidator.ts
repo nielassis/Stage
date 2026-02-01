@@ -1,4 +1,4 @@
-import { DocumentType } from '../generated/prisma/enums';
+import { DocumentType } from '@prisma/client';
 
 export class DocumentValidator {
   static clean(value: string): string {

@@ -1,4 +1,4 @@
-import { Os, OsStatus } from '../../generated/prisma/client';
+import { OsStatus } from '@prisma/client';
 import { PageResult, PaginationMetadata } from '../../types/pagination';
 
 export enum MyOsRoleFilter {

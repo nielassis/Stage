@@ -1,6 +1,5 @@
-import { tr } from 'zod/v4/locales';
 import { prisma } from '../../config/prisma';
-import { OsStageStatus, OsStatus, Prisma } from '../../generated/prisma/client';
+import { OsStageStatus, OsStatus, Prisma } from '@prisma/client';
 import { Permissions } from '../../lib/permissions';
 import { TenantContext } from '../../types/context';
 import { cleanString } from '../../utils/cleaners';

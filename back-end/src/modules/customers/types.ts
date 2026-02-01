@@ -1,5 +1,4 @@
-import { Customer } from '../../generated/prisma/client';
-import { DocumentType } from '../../generated/prisma/enums';
+import { Customer, DocumentType } from '@prisma/client';
 import { PageResult, PaginationMetadata } from '../../types/pagination';
 
 export type CreateCustomerDTO = {
