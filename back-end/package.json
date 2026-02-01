@@ -4,7 +4,8 @@
   "description": "REST API for service order management and stage control.",
   "main": "src/server.ts",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "prisma generate && prisma migrate deploy && tsc"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

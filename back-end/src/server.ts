@@ -1,19 +1,19 @@
 import app from './app';
 import { env } from './config/env';
 
-const host = 'localhost';
-const PORT = env.PORT || 3000;
+if (!process.env.VERCEL) {
+  const PORT = Number(env.PORT) || 3000;
 
-const start = async () => {
-  try {
-    await app.listen({ port: PORT, host });
-    app.log.info(
-      ` Server listening on ${host}:${PORT} \n  Docs: ${host}:${PORT}/docs`,
-    );
-  } catch (err) {
-    app.log.error(err);
-    process.exit(1);
-  }
-};
+  app
+    .listen({ port: PORT, host: '0.0.0.0' })
+    .then(() => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
+      console.log(`📄 Docs: http://localhost:${PORT}/docs`);
+    })
+    .catch((err) => {
+      app.log.error(err);
+      process.exit(1);
+    });
+}
 
-start();
+export default app;
