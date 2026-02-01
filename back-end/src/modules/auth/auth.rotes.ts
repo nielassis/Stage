@@ -10,12 +10,11 @@ export default async function authRoutes(app: FastifyInstance) {
     '/login',
     { schema: { body: authUserJsonSchema } },
     async (request, reply) => {
-      const result = await login(request.body);
-      reply.status(200).send(result);
+      const { email, password } = request.body;
+
+      const token = await login({ email, password });
+
+      reply.status(200).send(token);
     },
   );
-
-  app.get('/me', { preHandler: jwtAuth }, async (request, reply) => {
-    reply.send(request.authUserPayload);
-  });
 }
