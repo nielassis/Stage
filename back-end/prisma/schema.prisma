@@ -16,11 +16,16 @@ datasource db {
 enum TenantStatus {
   ACTIVE
   INACTIVE
-  TRIAL
   SUSPENDED
 }
 
+enum DocumentType {
+  CPF
+  CNPJ
+}
+
 enum UserRole {
+  PLATFORM_ADMIN
   ADMIN
   SUPERVISOR
   COLLABORATOR
@@ -34,6 +39,8 @@ enum OsStatus {
 
 enum OsStageStatus {
   OPEN
+  PENDING_APPROVAL
+  CANCELLED
   COMPLETED
   REJECTED
 }
@@ -42,9 +49,8 @@ model Tenant {
   id         String       @id @default(cuid())
   name       String       @unique
   email      String       @unique
-  status     TenantStatus
+  status     TenantStatus @default(ACTIVE)
   cnpj       String
-  trialEndAt DateTime?
   createdAt  DateTime     @default(now())
   updatedAt  DateTime?    @updatedAt
 
@@ -72,11 +78,12 @@ model User {
 }
 
 model Customer {
-  id       String @id @default(cuid())
-  tenantId String
-  name     String
-  email    String @unique
-  document String @unique
+  id           String       @id @default(cuid())
+  tenantId     String
+  name         String
+  email        String       @unique
+  document     String       @unique
+  documentType DocumentType
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
@@ -95,7 +102,7 @@ model Os {
   name        String
   description String
   amountCents Int
-  status      OsStatus
+  status      OsStatus @default(IN_PROGRESS)
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
@@ -117,7 +124,7 @@ model OsStage {
   tenantId    String
   name        String
   description String
-  status      OsStageStatus
+  status      OsStageStatus @default(OPEN)
   notes       String?
 
   createdAt DateTime  @default(now())

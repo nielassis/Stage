@@ -1,0 +1,5 @@
+-- AlterEnum
+ALTER TYPE "OsStageStatus" ADD VALUE 'PENDING_APPROVAL';
+
+-- AlterTable
+ALTER TABLE "OsStage" ALTER COLUMN "status" SET DEFAULT 'OPEN';
