@@ -17,10 +17,6 @@ import { passwordSchema } from '../../schemas/validPasswordSchema';
 export async function createUser(context: TenantContext, dto: CreateUserDTO) {
   Permissions.assertAdminPrivileges(context);
 
-  if (!context.tenantId) {
-    throw new AppError('No tenant associate with this user');
-  }
-
   const name = cleanString(dto.name);
   const email = normalizeEmail(dto.email);
   const role = dto.role ?? undefined;
@@ -35,6 +31,16 @@ export async function createUser(context: TenantContext, dto: CreateUserDTO) {
     throw new AppError('Email cannot be empty');
   }
 
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      email,
+    },
+  });
+
+  if (existingUser) {
+    throw new AppError('A user with this email address already exists.');
+  }
+
   const password = await bcrypt.hash(rawPassword, 10);
 
   const user = await prisma.user.create({
@@ -47,7 +53,7 @@ export async function createUser(context: TenantContext, dto: CreateUserDTO) {
     },
   });
 
-  return user;
+  return { user, password: rawPassword };
 }
 
 export async function listTenantUsers(
@@ -55,10 +61,6 @@ export async function listTenantUsers(
   query: UserListQuery,
 ) {
   Permissions.assertHighPrivileges(context);
-
-  if (!context.tenantId) {
-    throw new AppError('No tenant associate with this user');
-  }
 
   const { page, limit } = normalizePagination(query.page, query.limit);
 
@@ -124,6 +126,10 @@ export async function deleteUser(context: TenantContext, dto: GetUserDTO) {
     },
   });
 
+  if (!user) {
+    throw new AppError('Customer not found', 404);
+  }
+
   if (context.tenantId != user?.tenantId) {
     throw new AppError('Cross-Tenant peration blocked', 403);
   }
@@ -138,10 +144,6 @@ export async function deleteUser(context: TenantContext, dto: GetUserDTO) {
 }
 
 export async function userConfig(context: TenantContext, dto: UpdateUserDTO) {
-  if (!context.userId) {
-    throw new AppError('Unauthenticated', 401);
-  }
-
   const user = await prisma.user.findUnique({
     where: { id: context.userId },
   });
@@ -149,45 +151,49 @@ export async function userConfig(context: TenantContext, dto: UpdateUserDTO) {
   if (!user) {
     throw new AppError('User not found', 404);
   }
+  const name = dto.name !== undefined ? cleanString(dto.name) : user.name;
+  const email =
+    dto.email !== undefined ? normalizeEmail(dto.email) : user.email;
 
-  const dataToUpdate: Partial<{
-    name: string;
-    email: string;
-    password: string;
-  }> = {};
-
-  if (dto.name !== undefined) {
-    const name = cleanString(dto.name);
-    if (!name) {
-      throw new AppError('Name cannot be empty');
-    }
-    dataToUpdate.name = name;
-  }
-
-  if (dto.email !== undefined) {
-    const email = normalizeEmail(dto.email);
-    if (!email) {
-      throw new AppError('Email cannot be empty');
-    }
-    dataToUpdate.email = email;
-  }
+  let password: string | undefined;
 
   if (dto.password !== undefined) {
     const validation = passwordSchema.safeParse(dto.password);
+
     if (!validation.success) {
       throw new AppError('Weak password');
     }
-    dataToUpdate.password = await bcrypt.hash(dto.password, 10);
-  }
 
-  if (Object.keys(dataToUpdate).length === 0) {
-    throw new AppError('No data to update');
+    password = validation.data;
   }
 
   const updatedUser = await prisma.user.update({
     where: { id: context.userId },
-    data: dataToUpdate,
+    data: {
+      email,
+      name,
+      ...(password && { password }),
+    },
   });
 
   return updatedUser;
+}
+
+export async function getUserContext(context: TenantContext) {
+  const user = await prisma.user.findUnique({
+    where: { id: context.userId },
+    select: {
+      tenantId: true,
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+    },
+  });
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  return user;
 }
