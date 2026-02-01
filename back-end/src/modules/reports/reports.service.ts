@@ -39,8 +39,6 @@ export async function osStatusReport(
   context: TenantContext,
   query: DateRangeQuery,
 ) {
-  Permissions.assertHighPrivileges(context);
-
   const createdAt = dateFilter(query);
 
   const result = await prisma.os.groupBy({
@@ -82,44 +80,32 @@ export async function osFinancialReport(
   };
 }
 
-export async function osListReport(
-  context: TenantContext,
-  query: DateRangeQuery,
-) {
-  Permissions.assertHighPrivileges(context);
-
-  const { page, limit } = normalizePagination(query.page, query.limit);
-  const createdAt = dateFilter(query);
-
+export async function osListReport(context: TenantContext) {
   const where: Prisma.OsWhereInput = {
     tenantId: context.tenantId,
-    ...(createdAt && { createdAt }),
+    createdAt: {
+      gte: new Date(new Date().setDate(new Date().getDate() - 7)),
+    },
   };
-
-  const total = await prisma.os.count({ where });
 
   const data = await prisma.os.findMany({
     where,
     orderBy: { createdAt: 'desc' },
-    skip: (page - 1) * limit,
-    take: limit,
+    take: 5,
     select: {
       id: true,
       name: true,
       status: true,
       amountCents: true,
       createdAt: true,
+      responsible: {
+        select: { name: true, id: true },
+      },
     },
   });
 
   return {
     data,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
   };
 }
 
@@ -152,15 +138,18 @@ export async function stageTimelineReport(
 ) {
   Permissions.assertHighPrivileges(context);
 
+  const { page, limit } = normalizePagination(query.page, query.limit);
+
   const createdAt = dateFilter(query);
 
-  return prisma.osStage.findMany({
+  const data = await prisma.osStage.findMany({
     where: {
       tenantId: context.tenantId,
       ...(createdAt && { createdAt }),
     },
     orderBy: { updatedAt: 'desc' },
-    take: 50,
+    skip: (page - 1) * limit,
+    take: limit,
     select: {
       osId: true,
       name: true,
@@ -168,14 +157,22 @@ export async function stageTimelineReport(
       updatedAt: true,
     },
   });
+
+  return {
+    data,
+    pagination: {
+      page,
+      limit,
+      total: data.length,
+      totalPages: Math.ceil(data.length / limit),
+    },
+  };
 }
 
 export async function userProductivityReport(
   context: TenantContext,
   query: DateRangeQuery,
 ) {
-  Permissions.assertHighPrivileges(context);
-
   const createdAt = dateFilter(query);
 
   const users = await prisma.user.findMany({
@@ -207,8 +204,6 @@ export async function myOsSummaryReport(
   context: TenantContext,
   query: DateRangeQuery,
 ) {
-  Permissions.assertLowPrivileges(context);
-
   const createdAt = dateFilter(query);
 
   const total = await prisma.os.count({
