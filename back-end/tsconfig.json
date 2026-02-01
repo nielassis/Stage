@@ -14,10 +14,6 @@
     "types": ["node"],
 
     "baseUrl": ".",
-    "paths": {
-      "@prisma": ["src/generated/prisma"],
-      "@prisma/*": ["src/generated/prisma/*"]
-    },
     "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*", "prisma/**/*"],
