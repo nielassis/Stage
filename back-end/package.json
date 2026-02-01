@@ -5,7 +5,9 @@
   "main": "src/server.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "prisma generate && tsc"
+    "postinstall": "prisma generate",
+    "generate": "prisma generate",
+    "build": "npm run generate && tsc"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
