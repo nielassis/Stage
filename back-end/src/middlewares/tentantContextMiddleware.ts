@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { prisma } from '../config/prisma';
+import { AppError } from '../utils/error';
 
 export async function tenantContextMiddleware(
   req: FastifyRequest<{ Params?: { tenantId?: string } }>,
@@ -21,13 +22,11 @@ export async function tenantContextMiddleware(
   });
 
   if (!user || !user.tenantId) {
-    return reply.status(403).send({ message: 'Tenant not found' });
+    throw new AppError('User not found or not associated with a tenant', 404);
   }
 
   if (req.params?.tenantId && req.params.tenantId !== user.tenantId) {
-    return reply.status(403).send({
-      message: 'Cross-tenant access is not allowed',
-    });
+    throw new AppError('Cross-tenant access is not allowed', 403);
   }
 
   req.authUserPayload = {
