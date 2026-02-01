@@ -11,6 +11,12 @@ import fastifyCors from '@fastify/cors';
 import { tenantContextMiddleware } from './middlewares/tentantContextMiddleware';
 import { AppError } from './utils/error';
 import authRoutes from './modules/auth/auth.rotes';
+import { tenancyRoutes } from './modules/tenancy/tenancy.routes';
+import { jwtAuth } from './middlewares/jwtAuth';
+import { usersRoutes } from './modules/users/users.routes';
+import { serviceOrderRoutes } from './modules/service-order/service-order.routes';
+import { osStagesRoutes } from './modules/service-order-stage/service-order-stage.routes';
+import { reportsRoutes } from './modules/reports/reports.routes';
 
 const app = fastify({
   logger: {
@@ -62,6 +68,7 @@ app.register(
 
     // 🔒 Rotas protegidas
     api.register(async (privateApi) => {
+      privateApi.addHook('preHandler', jwtAuth);
       privateApi.addHook('preHandler', tenantContextMiddleware);
 
       privateApi.register(rateLimit, {
@@ -72,6 +79,12 @@ app.register(
             req.authUserPayload?.userId ??
             req.ip) as string,
       });
+
+      privateApi.register(tenancyRoutes);
+      privateApi.register(usersRoutes);
+      privateApi.register(serviceOrderRoutes);
+      privateApi.register(osStagesRoutes);
+      privateApi.register(reportsRoutes);
     });
   },
   { prefix: '/api' },
