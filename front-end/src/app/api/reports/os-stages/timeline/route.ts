@@ -19,8 +19,6 @@ export async function GET() {
     },
   );
 
-  console.log(res);
-
   if (!res.ok) {
     return NextResponse.json([], { status: 200 });
   }

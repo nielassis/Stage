@@ -1,16 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 const BACKEND_URL = process.env.BACKEND_URL!;
 
 export async function GET(
-  _req: Request,
-  { params }: { params: { id: string } },
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
 
   const token = (await cookies()).get("auth_token")?.value;
-
   if (!token) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
@@ -34,17 +33,18 @@ export async function GET(
 }
 
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } },
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const body = await req.json();
-  const token = (await cookies()).get("auth_token")?.value;
 
+  const token = (await cookies()).get("auth_token")?.value;
   if (!token) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const response = await fetch(`${BACKEND_URL}/customers/${params.id}`, {
+  const response = await fetch(`${BACKEND_URL}/customers/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -66,16 +66,17 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _req: Request,
-  { params }: { params: { id: string } },
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const token = (await cookies()).get("auth_token")?.value;
+  const { id } = await params;
 
+  const token = (await cookies()).get("auth_token")?.value;
   if (!token) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const response = await fetch(`${BACKEND_URL}/customers/${params.id}`, {
+  const response = await fetch(`${BACKEND_URL}/customers/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,

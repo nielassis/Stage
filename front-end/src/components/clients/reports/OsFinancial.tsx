@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { DollarSign } from "lucide-react";
 import { fetchOsFinancial } from "@/src/actions/reports/fetchReports";
 import { KpiCard } from "../../ui/kpiCards";
+import { formatCurrency } from "@/src/utils/ui/formatCurrency";
 
 interface OsFinancial {
   totalAmountCents: number;
@@ -30,6 +31,9 @@ export default function OsFinancialPage() {
     loadData();
   }, []);
 
+  const amount = (financial?.totalAmountCents ?? 0) / 100;
+  const avg = (financial?.avgAmountCents ?? 0) / 100;
+
   return (
     <>
       <div className="flex w-full flex-col space-y-4">
@@ -40,13 +44,15 @@ export default function OsFinancialPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <KpiCard
               label="Total faturado"
-              value={financial?.totalAmountCents || 0}
+              value={amount}
+              isCurrency
               icon={DollarSign}
               iconColor="text-green-500"
             />
             <KpiCard
               label="Média por OS"
-              value={financial?.avgAmountCents || 0}
+              value={avg}
+              isCurrency
               icon={DollarSign}
               iconColor="text-yellow-500"
             />

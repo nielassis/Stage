@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 export async function GET() {
@@ -22,12 +22,10 @@ export async function GET() {
 
   const user = await response.json();
 
-  return NextResponse.json({
-    user,
-  });
+  return NextResponse.json({ user });
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   const body = await req.json();
   const cookieStore = await cookies();
   const token = cookieStore.get("auth_token")?.value;

@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
+
   const cookieStore = await cookies();
   const token = cookieStore.get("auth_token")?.value;
 

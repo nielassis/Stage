@@ -1,10 +1,11 @@
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const query = url.searchParams.toString();
+
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
 

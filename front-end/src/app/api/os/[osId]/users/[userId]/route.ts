@@ -1,12 +1,14 @@
+import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 
 const BACKEND_URL = process.env.BACKEND_URL!;
 
 export async function DELETE(
-  _req: Request,
-  { params }: { params: { osId: string; userId: string } },
+  _req: NextRequest,
+  { params }: { params: Promise<{ osId: string; userId: string }> },
 ) {
   const { osId, userId } = await params;
+
   const cookieStore = await cookies();
   const token = cookieStore.get("auth_token")?.value;
 

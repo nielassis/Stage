@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 const BACKEND_URL = process.env.BACKEND_URL!;
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const body = await req.json();
   const token = (await cookies()).get("auth_token")?.value;
 
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
   return NextResponse.json(data);
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   const token = (await cookies()).get("auth_token")?.value;
 
   if (!token) {

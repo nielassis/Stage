@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 const BACKEND_URL = process.env.BACKEND_URL!;
 
 export async function GET(
-  req: Request,
-  { params }: { params: { osId: string } },
+  _req: NextRequest,
+  { params }: { params: Promise<{ osId: string }> },
 ) {
   const { osId } = await params;
 
@@ -41,10 +41,11 @@ export async function GET(
 }
 
 export async function POST(
-  req: Request,
-  { params }: { params: { osId: string } },
+  req: NextRequest,
+  { params }: { params: Promise<{ osId: string }> },
 ) {
-  const { osId } = params;
+  const { osId } = await params;
+
   const cookieStore = await cookies();
   const token = cookieStore.get("auth_token")?.value;
 

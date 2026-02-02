@@ -1,10 +1,11 @@
+import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 
 const BACKEND_URL = process.env.BACKEND_URL!;
 
 export async function POST(
-  _req: Request,
-  { params }: { params: { osId: string } },
+  _req: NextRequest,
+  { params }: { params: Promise<{ osId: string }> },
 ) {
   const { osId } = await params;
 
@@ -17,8 +18,6 @@ export async function POST(
       Authorization: `Bearer ${token}`,
     },
   });
-
-  console.log(res);
 
   return Response.json(await res.json(), { status: res.status });
 }

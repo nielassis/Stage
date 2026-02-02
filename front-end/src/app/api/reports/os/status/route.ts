@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
   const cookieStore = await cookies();
   const token = cookieStore.get("auth_token")?.value;
 
@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ message: "Não autenticado" }, { status: 401 });
   }
 
-  const { searchParams } = new URL(request.url);
+  const { searchParams } = new URL(req.url);
 
   const startDate = searchParams.get("startDate");
   const endDate = searchParams.get("endDate");
@@ -21,7 +21,6 @@ export async function GET(request: Request) {
   const response = await fetch(
     `${process.env.BACKEND_URL}/reports/os/status?${query.toString()}`,
     {
-      method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -37,6 +36,5 @@ export async function GET(request: Request) {
   }
 
   const data = await response.json();
-
   return NextResponse.json(data);
 }
