@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 import { Me, UserRole } from "@/src/utils/auth/types";
-import { Badge } from "../../ui/badge";
+
 import Logo from "./logo";
 import { cn } from "@/src/lib/utils";
 import { Avatar, AvatarFallback } from "../../ui/avatar";
@@ -25,18 +25,54 @@ import { Button } from "../../ui/button";
 import { getAvatarLetters } from "@/src/utils/userContext/getAvatarImage";
 
 const sidebarNavItems = [
-  { title: "Início", href: "/dashboard", icon: Home },
-  { title: "Usuários", href: "/dashboard/users", icon: Users },
-  { title: "Clientes", href: "/dashboard/customers", icon: ContactRound },
-  { title: "Os", href: "/dashboard/os", icon: FileText },
-  { title: "Relatórios", href: "/dashboard/reports", icon: BarChart },
+  {
+    title: "Início",
+    href: "/dashboard",
+    icon: Home,
+    minRole: UserRole.COLLABORATOR,
+  },
+  {
+    title: "Usuários",
+    href: "/dashboard/users",
+    icon: Users,
+    minRole: UserRole.SUPERVISOR,
+  },
+  {
+    title: "Clientes",
+    href: "/dashboard/customers",
+    icon: ContactRound,
+    minRole: UserRole.COLLABORATOR,
+  },
+  {
+    title: "Os",
+    href: "/dashboard/os",
+    icon: FileText,
+    minRole: UserRole.COLLABORATOR,
+  },
+  {
+    title: "Relatórios",
+    href: "/dashboard/reports",
+    icon: BarChart,
+    minRole: UserRole.SUPERVISOR,
+  },
   {
     title: "Empresa",
     href: "/dashboard/tenant",
     icon: Building2,
-    isForAdmin: true,
+    minRole: UserRole.ADMIN,
   },
 ];
+
+export const RoleHierarchy = {
+  [UserRole.COLLABORATOR]: 1,
+  [UserRole.SUPERVISOR]: 2,
+  [UserRole.ADMIN]: 3,
+  [UserRole.PLATFORM_ADMIN]: 4,
+} as const;
+
+function canAccess(userRole: UserRole, minRole: UserRole) {
+  return RoleHierarchy[userRole] >= RoleHierarchy[minRole];
+}
 
 interface SidebarProps {
   navbarIsOpen: boolean;
@@ -91,19 +127,14 @@ export function Sidebar({
                 <Skeleton key={i} className="h-8 w-full rounded-md my-1" />
               ))
             : sidebarNavItems.map((item, index) => {
+                if (!canAccess(me.role, item.minRole)) return null;
+
                 const isActive =
                   item.href === "/dashboard"
                     ? pathname === "/dashboard"
                     : pathname.startsWith(item.href);
 
                 const Icon = item.icon;
-
-                if (
-                  item.isForAdmin &&
-                  me.role !== UserRole.ADMIN &&
-                  me.role !== UserRole.PLATFORM_ADMIN
-                )
-                  return;
 
                 return (
                   <Link
@@ -119,11 +150,6 @@ export function Sidebar({
                   >
                     <Icon className="h-5 w-5" />
                     {item.title}
-                    {item.isForAdmin && (
-                      <Badge variant="default" className="ml-auto">
-                        Admin
-                      </Badge>
-                    )}
                   </Link>
                 );
               })}
@@ -161,12 +187,13 @@ export function Sidebar({
 
       {!navbarIsOpen && (
         <>
-          <button
-            className="fixed top-2 left-0 z-50 p-3 shadow-md bg-white text-gray-400 md:hidden rounded-r-2xl"
+          <Button
+            className="fixed top-2 right-0 z-50 p-3 shadow-md md:hidden rounded-e-lg"
+            variant="outline"
             onClick={() => toogleNavbarOpen(true)}
           >
             <EllipsisVertical className="h-5 w-5" />
-          </button>
+          </Button>
         </>
       )}
     </>
