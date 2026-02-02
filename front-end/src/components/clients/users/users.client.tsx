@@ -16,7 +16,7 @@ import { TenantUser, UserRoleLabels } from "@/src/utils/userContext/types";
 import { fetchTenantUsers } from "@/src/actions/users/fetchTenantUsers";
 import { UserRole } from "@/src/utils/auth/types";
 import NoResultFallback from "../../misc/layout/noResultFallback";
-import { UserX, Search, RefreshCcw, Plus } from "lucide-react";
+import { UserX, Search, RefreshCcw } from "lucide-react";
 import { UsersTableSkeleton } from "../../ui/skeleton/usersTableSkeleton";
 import { BadgeProps, Badge } from "../../ui/badge";
 import { Card } from "../../ui/card";
@@ -24,8 +24,7 @@ import { Input } from "../../ui/input";
 import { Button } from "../../ui/button";
 import { Avatar, AvatarFallback } from "../../ui/avatar";
 import { getAvatarLetters } from "@/src/utils/userContext/getAvatarImage";
-import { useAuth } from "@/src/contexts/authContext";
-import Link from "next/link";
+import { getSliceId } from "@/src/utils/ui/getSliceId";
 
 const badgeDictUserRole: Record<UserRole, BadgeProps["variant"]> = {
   [UserRole.COLLABORATOR]: "success",
@@ -37,7 +36,7 @@ const badgeDictUserRole: Record<UserRole, BadgeProps["variant"]> = {
 export default function UsersClientPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user: me } = useAuth();
+
   const [users, setUsers] = useState<TenantUser[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -90,9 +89,6 @@ export default function UsersClientPage() {
     router.push(`?${params.toString()}`);
   }
 
-  const isFirstPage = page <= 1;
-  const isLastPage = page >= totalPages;
-
   return (
     <>
       <Card className="flex flex-col md:flex-row gap-3 p-4">
@@ -110,32 +106,23 @@ export default function UsersClientPage() {
         </div>
 
         <div className="flex flex-col md:flex-row gap-2">
-          <Button variant="outline">
-            <RefreshCcw className="h-4 w-4 mr-1" onClick={clearFilter} />
+          <Button variant="outline" onClick={clearFilter}>
+            <RefreshCcw className="h-4 w-4 mr-1" />
             Limpar
           </Button>
 
-          <Button>
+          <Button onClick={applyFilter}>
             <Search className="h-4 w-4 mr-1" />
             Filtrar
           </Button>
         </div>
       </Card>
 
-      {me?.role === UserRole.ADMIN ||
-        (me?.role === UserRole.PLATFORM_ADMIN && (
-          <Link href="/dashboard/users/new">
-            <Button className="w-fit items-center" variant="default">
-              <Plus className="h-4 w-4 mr-1" />
-              Criar Usuário
-            </Button>
-          </Link>
-        ))}
-
       <div className="rounded-xl shadow-md border bg-card overflow-hidden flex flex-col">
         <Table>
           <TableHeader>
             <TableRow className="border-b">
+              <TableHead>Id</TableHead>
               <TableHead>Usuário</TableHead>
               <TableHead className="text-center">Função</TableHead>
             </TableRow>
@@ -146,7 +133,7 @@ export default function UsersClientPage() {
               <UsersTableSkeleton limit={limit} />
             ) : users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={2}>
+                <TableCell colSpan={4}>
                   <NoResultFallback
                     text="Nenhum usuário encontrado"
                     icon={UserX}
@@ -155,10 +142,10 @@ export default function UsersClientPage() {
               </TableRow>
             ) : (
               users.map((user) => (
-                <TableRow
-                  key={user.id}
-                  className="hover:bg-muted/40 transition-colors"
-                >
+                <TableRow key={user.id}>
+                  <TableCell className="italic text-muted-foreground">
+                    #{getSliceId(user.id)}
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
@@ -193,28 +180,24 @@ export default function UsersClientPage() {
 
           <TableFooter>
             <TableRow>
-              <TableCell colSpan={2}>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-3 w-full">
-                  <span className="text-sm text-muted-foreground text-center sm:text-left">
-                    {totalRecords === 0
-                      ? "Nenhum resultado encontrado"
-                      : `Mostrando ${users.length} de ${totalRecords} registros`}
+              <TableCell colSpan={4}>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">
+                    Mostrando {users.length} de {totalRecords}
                   </span>
 
-                  <div className="flex items-center justify-center sm:justify-end gap-2">
+                  <div className="flex gap-2 items-center">
                     <Button
-                      disabled={isFirstPage}
+                      disabled={page <= 1}
                       onClick={() => goToPage(page - 1)}
                     >
                       Anterior
                     </Button>
-
-                    <span className="text-sm font-medium whitespace-nowrap">
+                    <span className="text-sm">
                       Página {page} de {totalPages}
                     </span>
-
                     <Button
-                      disabled={isLastPage}
+                      disabled={page >= totalPages}
                       onClick={() => goToPage(page + 1)}
                     >
                       Próxima
