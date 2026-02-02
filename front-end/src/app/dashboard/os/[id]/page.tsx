@@ -2,32 +2,59 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 
 import { Card } from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
-import { Skeleton } from "@/src/components/ui/skeleton";
 import { Badge, BadgeProps } from "@/src/components/ui/badge";
+import { Skeleton } from "@/src/components/ui/skeleton";
+
 import {
   ArrowLeft,
-  Calendar,
   CheckCircle2,
+  CheckCheck,
+  X,
   DollarSign,
-  MoreVertical,
-  Plus,
+  Calendar,
   User,
+  UserX,
 } from "lucide-react";
 
 import { useAuth } from "@/src/contexts/authContext";
 import { getOsById } from "@/src/actions/os/getOsById";
-
-import { TenantOsItem } from "@/src/utils/os/types";
-
-import Link from "next/link";
-import { InfoRow } from "@/src/components/misc/layout/os/itemRow";
-
+import { listOsUsers } from "@/src/actions/os/listOsUsers";
 import { joinOs } from "@/src/actions/os/joinOs";
+import { closeOs } from "@/src/actions/os/closeOs";
+import { cancelOs } from "@/src/actions/os/cancelOs";
+
+import { InfoRow } from "@/src/components/misc/layout/os/itemRow";
 import Loader from "@/src/components/misc/layout/loader";
-import { OsStatus } from "@/src/utils/dashboard/types";
+import NoResultFallback from "@/src/components/misc/layout/noResultFallback";
+
+import { TenantOsItem, OsListUser } from "@/src/utils/os/types";
+import { StageItem } from "@/src/utils/os-stages/types";
+import {
+  OsStageStatus,
+  OsStageStatusLabels,
+  OsStatus,
+  OsStatusLabels,
+} from "@/src/utils/dashboard/types";
+import { UserRole } from "@/src/utils/auth/types";
+import { getSliceId } from "@/src/utils/ui/getSliceId";
+import { Avatar, AvatarFallback } from "@/src/components/ui/avatar";
+import { getAvatarLetters } from "@/src/utils/userContext/getAvatarImage";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/src/components/ui/table";
+import { UsersTableSkeleton } from "@/src/components/ui/skeleton/usersTableSkeleton";
+
+import { listOsStages } from "@/src/actions/os-stages/listStage";
 
 const badgeDictOsStatus: Record<OsStatus, BadgeProps["variant"]> = {
   [OsStatus.CANCELLED]: "destructive",
@@ -35,52 +62,95 @@ const badgeDictOsStatus: Record<OsStatus, BadgeProps["variant"]> = {
   [OsStatus.CLOSED]: "success",
 };
 
+const badgeDictOsStageStatus: Record<OsStageStatus, BadgeProps["variant"]> = {
+  [OsStageStatus.COMPLETED]: "success",
+  [OsStageStatus.CANCELLED]: "destructive",
+  [OsStageStatus.OPEN]: "link",
+  [OsStageStatus.PENDING_APPROVAL]: "link",
+  [OsStageStatus.REJECTED]: "destructive",
+};
+
 export default function OsDetailPage() {
   const { id } = useParams();
-
   const { user: me } = useAuth();
 
   const [os, setOs] = useState<TenantOsItem | null>(null);
+  const [osUsers, setOsUsers] = useState<OsListUser[]>([]);
+  const [osStages, setOsStages] = useState<StageItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [usersLoading, setUsersLoading] = useState(true);
+  const [stagesLoading, setStagesLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
 
-    async function loadOs() {
+    async function loadData() {
       setLoading(true);
+      setUsersLoading(true);
+      setStagesLoading(true);
       try {
-        const data = await getOsById({ id: id as string });
-        setOs(data);
+        const [osData, usersData, stagesData] = await Promise.all([
+          getOsById({ id: id as string }),
+          listOsUsers(id as string),
+          listOsStages({ osId: id as string }),
+        ]);
+        setOs(osData);
+        setOsUsers(usersData);
+        setOsStages(stagesData);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
+        setUsersLoading(false);
+        setStagesLoading(false);
       }
     }
 
-    loadOs();
+    loadData();
   }, [id]);
 
   if (!me || loading) return <Skeleton className="h-100 w-full rounded-md" />;
-
   if (!os) return <p>OS não encontrada</p>;
 
   async function handleJoin() {
-    if (!os) return;
-    setActionLoading(true);
+    setActionLoading("join");
     try {
-      await joinOs({ id: os.id });
+      await joinOs({ id: id as string });
       window.location.reload();
     } catch (err) {
       console.error(err);
     } finally {
-      setActionLoading(false);
+      setActionLoading(null);
+    }
+  }
+
+  async function handleClose() {
+    setActionLoading("close");
+    try {
+      await closeOs({ id: id as string });
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleCancel() {
+    setActionLoading("cancel");
+    try {
+      await cancelOs({ id: id as string });
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(null);
     }
   }
 
   return (
-    <div className="min-h-screenp-6">
+    <div className="min-h-screen p-6">
       <div className="flex items-center gap-4 mb-8">
         <Link href="/dashboard/os">
           <Button variant="ghost" size="icon">
@@ -90,83 +160,54 @@ export default function OsDetailPage() {
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold tracking-tight">{os.name}</h1>
-            <Badge variant={badgeDictOsStatus[os.status]}>Em Andamento</Badge>
+            <Badge variant={badgeDictOsStatus[os.status]}>
+              {OsStatusLabels[os.status]}
+            </Badge>
           </div>
           <p>{os.description}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-4">
-        <Card className="lg:col-span-2 px-4 ">
-          <div className="flex justify-between items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-4 flex-1">
+        <Card className="lg:col-span-2 px-4">
+          <div className="flex justify-between items-center px-4 mb-2">
             <h2 className="text-xl font-semibold">Etapas</h2>
-            <Button size="sm" className="gap-2">
-              <Plus className="h-4 w-4" /> Nova Etapa
-            </Button>
+            <Link href={`/dashboard/os/${id}/stage/new`}>
+              <Button size="sm">+ Nova Etapa</Button>
+            </Link>
           </div>
 
-          <Card className="border-none p-2">
-            {[
-              {
-                id: 1,
-                title: "Analise de Requisitos",
-                desc: "Levantamento detalhado das necessidades do cliente",
-                status: "Concluido",
-                color: "text-green-500",
-              },
-              {
-                id: 2,
-                title: "Desenvolvimento Modulo A",
-                desc: "Implementacao do primeiro modulo do sistema",
-                status: "Concluido",
-                color: "text-green-500",
-              },
-              {
-                id: 3,
-                title: "Desenvolvimento Modulo B",
-                desc: "Implementacao do segundo modulo do sistema",
-                status: "Aguardando Aprovação",
-                color: "text-yellow-500",
-              },
-              {
-                id: 4,
-                title: "Testes e Validacao",
-                desc: "Testes unitarios e de integracao",
-                status: "Aberto",
-                color: "text-slate-400",
-              },
-            ].map((step) => (
-              <Card
-                key={step.id}
-                className="flex flex-row justify-between p-3 border-none"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full flex items-center justify-center font-bold">
-                    {step.id}
+          <Card className="lg:col-span-2 px-4 flex-1 border-none shadow-none space-y-2">
+            {stagesLoading ? (
+              <Skeleton className="h-20 w-full rounded-md" />
+            ) : osStages.length === 0 ? (
+              <p className="text-muted-foreground">Nenhuma etapa cadastrada</p>
+            ) : (
+              osStages.map((stage, idx) => (
+                <Card
+                  className="flex flex-row justify-between items-center p-3 cursor-pointer hover:bg-background/80"
+                  key={stage.id}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full flex items-center justify-center font-bold bg-gray-100">
+                      {idx + 1}
+                    </div>
+                    <div>
+                      <h3 className="font-medium">{stage.name}</h3>
+                      <p className="text-sm">{stage.description}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium ">{step.title}</h3>
-                    <p className="text-sm">{step.desc}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge
-                    variant="outline"
-                    className={`bg-transparent ${step.color} font-normal`}
-                  >
-                    {step.status}
+                  <Badge variant={badgeDictOsStageStatus[stage.status]}>
+                    {OsStageStatusLabels[stage.status]}
                   </Badge>
-                  <Button variant="ghost" size="icon">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))
+            )}
           </Card>
         </Card>
 
         <div className="space-y-6">
-          <Card className=" border p-4 space-y-4">
+          <Card className="border p-4 space-y-4">
             <h2 className="text-xl font-semibold">Informações</h2>
             <div className="space-y-3">
               <InfoRow
@@ -192,20 +233,111 @@ export default function OsDetailPage() {
             </div>
           </Card>
 
-          <Card className="p-4">
+          <Card className="px-4">
             <h2 className="text-xl font-semibold">Ações</h2>
-
             <Button
               variant="default"
               className="w-full"
               disabled={me.id === os.responsible?.id}
               onClick={handleJoin}
             >
-              {actionLoading ? <Loader /> : ""}
-              <CheckCircle2 className="h-4 w-4 mr-2" /> Participar da OS
+              {actionLoading === "join" ? (
+                <Loader />
+              ) : (
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+              )}
+              Participar da OS
             </Button>
+
+            {(me.role === UserRole.ADMIN ||
+              me.role === UserRole.PLATFORM_ADMIN ||
+              me.role === UserRole.SUPERVISOR) && (
+              <>
+                <Button
+                  variant="outline"
+                  className="w-full mt-2"
+                  onClick={handleClose}
+                  disabled={actionLoading === "close"}
+                >
+                  {actionLoading === "close" ? (
+                    <Loader />
+                  ) : (
+                    <CheckCheck className="h-4 w-4 mr-2" />
+                  )}
+                  Fechar OS
+                </Button>
+
+                <Button
+                  variant="destructive"
+                  className="w-full mt-2"
+                  onClick={handleCancel}
+                  disabled={actionLoading === "cancel"}
+                >
+                  {actionLoading === "cancel" ? (
+                    <Loader />
+                  ) : (
+                    <X className="h-4 w-4 mr-2" />
+                  )}
+                  Cancelar OS
+                </Button>
+              </>
+            )}
           </Card>
         </div>
+      </div>
+
+      {/* Usuários */}
+      <p className="mt-6 text-muted-foreground">
+        Usuários relacionados à ordem de serviço
+      </p>
+      <div className="rounded-xl shadow-md border bg-card overflow-hidden flex flex-col mt-4">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b">
+              <TableHead>Id</TableHead>
+              <TableHead>Usuário</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {usersLoading ? (
+              <UsersTableSkeleton limit={20} />
+            ) : osUsers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={2}>
+                  <NoResultFallback
+                    text="Nenhum usuário encontrado"
+                    icon={UserX}
+                  />
+                </TableCell>
+              </TableRow>
+            ) : (
+              osUsers.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell className="italic text-muted-foreground">
+                    #{getSliceId(user.id)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>
+                          {getAvatarLetters(user.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="font-medium leading-tight">
+                          {user.name}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {user.email}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

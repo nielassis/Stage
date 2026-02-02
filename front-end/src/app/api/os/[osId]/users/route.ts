@@ -2,18 +2,19 @@ import { cookies } from "next/headers";
 
 const BACKEND_URL = process.env.BACKEND_URL!;
 
-export async function POST(
+export async function GET(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: { osId: string } },
 ) {
+  const { osId } = await params;
   const cookieStore = await cookies();
   const token = cookieStore.get("auth_token")?.value;
 
-  const res = await fetch(`${BACKEND_URL}/os/${params.id}/join`, {
-    method: "POST",
+  const res = await fetch(`${BACKEND_URL}/os/${osId}/users`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
+    cache: "no-store",
   });
 
   return Response.json(await res.json(), { status: res.status });

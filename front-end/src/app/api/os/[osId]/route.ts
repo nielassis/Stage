@@ -4,14 +4,14 @@ const BACKEND_URL = process.env.BACKEND_URL!;
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ osId: string }> },
 ) {
-  const { id } = await params;
+  const { osId } = await params;
 
   const cookieStore = await cookies();
   const token = cookieStore.get("auth_token")?.value;
 
-  const res = await fetch(`${BACKEND_URL}/os/${id}`, {
+  const res = await fetch(`${BACKEND_URL}/os/${osId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

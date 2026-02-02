@@ -9,7 +9,5 @@ export async function closeOs({ id }: GetOsDTO) {
     throw new Error("Erro ao fechar OS");
   }
 
-  console.log(res);
-
   return res.json();
 }

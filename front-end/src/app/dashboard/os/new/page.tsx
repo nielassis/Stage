@@ -161,7 +161,6 @@ export default function CreateOsPage() {
                     </FormControl>
                     <FormMessage />
 
-                    {/* Optional: um pequeno loader visual ao lado do select */}
                     {loadingCustomers && <Loader />}
                   </FormItem>
                 )}

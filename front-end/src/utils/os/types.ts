@@ -24,6 +24,12 @@ export type CreateOsDTO = {
   name: string;
 };
 
+export type OsListUser = {
+  id: string;
+  name: string;
+  email: string;
+};
+
 export type GetOsDTO = {
   id: string;
 };

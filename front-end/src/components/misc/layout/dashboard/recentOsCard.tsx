@@ -39,7 +39,7 @@ export function RecentOrdersCard() {
   }
 
   return (
-    <Card className="rounded-xl border p-4 space-y-4 h-full flex flex-1 flex-col ">
+    <Card className="rounded-xl border p-4 h-full flex flex-1 flex-col ">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
