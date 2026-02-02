@@ -140,7 +140,7 @@ export default function CustomersClientPage() {
         <div className="relative flex-1">
           <Input
             type="search"
-            placeholder="Buscar usuário..."
+            placeholder="Buscar clientes..."
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
             className="pl-8 w-full"
