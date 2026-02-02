@@ -36,16 +36,11 @@ export async function createOs(
   }
 
   const name = cleanString(dto.name);
-  const responsibleId = dto.responsibleId;
   const description = cleanString(dto.description);
   const amountCents = dto.amountCents;
 
   if (!name) {
     throw new AppError('Name cannot be empty');
-  }
-
-  if (!responsibleId) {
-    throw new AppError('Responsible cannot be empty');
   }
 
   if (!description) {
@@ -500,6 +495,10 @@ export async function getOsById(context: TenantContext, dto: GetOsDTO) {
     where: {
       tenantId: context.tenantId,
       id: dto.id,
+    },
+    include: {
+      responsible: true,
+      customer: true,
     },
   });
 

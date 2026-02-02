@@ -1,11 +1,9 @@
+import { PaginationMetadata } from "../types";
+
 export enum DocumentType {
   CPF = "CPF",
   CNPJ = "CNPJ",
 }
-export type PaginationMetadata = {
-  page?: number;
-  limit?: number;
-};
 
 export type CreateCustomerDTO = {
   name: string;

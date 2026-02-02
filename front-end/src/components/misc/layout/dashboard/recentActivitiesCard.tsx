@@ -20,6 +20,7 @@ import { getAvatarLetters } from "@/src/utils/userContext/getAvatarImage";
 import NoResultFallback from "../noResultFallback";
 import { Clock } from "lucide-react";
 import { Separator } from "@/src/components/ui/separator";
+import { getSliceId } from "@/src/utils/ui/getSliceId";
 
 export const OsStageStatusBadgeDict: Record<
   OsStageStatus,
@@ -100,7 +101,7 @@ export function RecentActivitiesCard() {
                         : "Editou"
                       : "Criou"}{" "}
                     <span className="font-medium">{activity.name}</span> da OS #
-                    {activity.osId.slice(0, 6)}
+                    {getSliceId(activity.osId)}
                   </p>
 
                   <p className="text-xs text-muted-foreground/70 mt-0.5">

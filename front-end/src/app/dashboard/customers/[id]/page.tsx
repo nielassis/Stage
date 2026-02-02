@@ -102,7 +102,7 @@ export default function CustomerPage() {
             <TabsTrigger value="edit">Editar</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="details">
+          <TabsContent value="details" className="w-full">
             {loading || !customer ? (
               <CustomerDetailsSkeleton />
             ) : (

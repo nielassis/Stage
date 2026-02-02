@@ -3,7 +3,7 @@ import { formatDateDDMMYY } from "@/src/utils/ui/formatDate";
 
 export default function CustomerDetails({ customer }: { customer: Customer }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 w-full">
       <div>
         <span className="text-sm text-muted-foreground">Nome</span>
         <p className="font-medium">{customer.name}</p>

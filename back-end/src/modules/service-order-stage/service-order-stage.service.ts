@@ -6,7 +6,7 @@ import { cleanString } from '../../utils/cleaners';
 import { AppError } from '../../utils/error';
 import {
   CreateOsStageDTO,
-  GetOsStageDTO,
+  GetOsStageDTO,  
   RejectStageDTO,
   UpdateStageDTO,
 } from './types';

@@ -1,14 +1,24 @@
-import { OsStatus } from '@prisma/client';
-import { PageResult, PaginationMetadata } from '../../types/pagination';
+import { PageResult, PaginationMetadata } from "../types";
 
 export enum MyOsRoleFilter {
-  RESPONSIBLE = 'RESPONSIBLE',
-  PARTICIPANT = 'PARTICIPANT',
+  RESPONSIBLE = "RESPONSIBLE",
+  PARTICIPANT = "PARTICIPANT",
 }
+
+export enum OsStatus {
+  IN_PROGRESS = "IN_PROGRESS",
+  CANCELLED = "CANCELLED",
+  CLOSED = "CLOSED",
+}
+
+export const OsStatusLabels: Record<OsStatus, string> = {
+  [OsStatus.IN_PROGRESS]: "Em Andamento",
+  [OsStatus.CANCELLED]: "Cancelada",
+  [OsStatus.CLOSED]: "Concluída",
+};
 
 export type CreateOsDTO = {
   customerId: string;
-
   description: string;
   amountCents: number;
   name: string;
@@ -56,6 +66,7 @@ export type TenantOsItem = {
   status: OsStatus;
   amountCents: number;
   createdAt: Date;
+  description: string;
   customer: {
     id: string;
     name: string;
@@ -67,7 +78,6 @@ export type TenantOsItem = {
   };
 };
 
-export type MyOsPage = PageResult<MyOsItem>;
 export type MyOsQueryList = MyOsListFilter & PaginationMetadata;
 
 export type OsPage = PageResult<TenantOsItem>;

@@ -14,6 +14,6 @@ export type RejectStageDTO = {
 };
 
 export type UpdateStageDTO = {
-  name: string;
-  description: string;
+  name?: string;
+  description?: string;
 };
