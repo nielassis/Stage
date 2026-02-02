@@ -12,6 +12,7 @@ import {
   GetCustomerDTO,
   UpdateCustomerDTO,
 } from './types';
+import { normalizePagination } from '../../utils/normalizePagination';
 
 export async function createCustomer(
   context: TenantContext,

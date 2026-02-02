@@ -125,28 +125,17 @@ export async function reportsRoutes(app: FastifyInstance) {
       },
     );
 
-    panel.get<{ Querystring: DateRangeQuery }>(
-      '/reports/os-stages/timeline',
-      {
-        schema: {
-          querystring: dateRangeQueryJsonSchema,
-        },
-      },
-      async (request, reply) => {
-        const user = request.authUserPayload as AuthUserPayload;
+    panel.get<{}>('/reports/os-stages/timeline', {}, async (request, reply) => {
+      const user = request.authUserPayload as AuthUserPayload;
 
-        const result = await stageTimelineReport(
-          {
-            tenantId: user.tenantId,
-            userId: user.userId,
-            role: user.role,
-          },
-          request.query,
-        );
+      const result = await stageTimelineReport({
+        tenantId: user.tenantId,
+        userId: user.userId,
+        role: user.role,
+      });
 
-        return sendJsonSafe(reply, result);
-      },
-    );
+      return sendJsonSafe(reply, result);
+    });
 
     panel.get<{ Querystring: DateRangeQuery }>(
       '/reports/users/productivity',

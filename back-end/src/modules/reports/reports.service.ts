@@ -3,6 +3,7 @@ import { Prisma, OsStatus } from '@prisma/client';
 import { Permissions } from '../../lib/permissions';
 import { TenantContext } from '../../types/context';
 import { DateRangeQuery } from './types';
+import { normalizePagination } from '../../utils/normalizePagination';
 
 function dateFilter(query: DateRangeQuery): Prisma.DateTimeFilter | undefined {
   if (!query.startDate && !query.endDate) return undefined;
@@ -132,41 +133,27 @@ export async function stageStatusReport(
   }));
 }
 
-export async function stageTimelineReport(
-  context: TenantContext,
-  query: DateRangeQuery,
-) {
-  Permissions.assertHighPrivileges(context);
-
-  const { page, limit } = normalizePagination(query.page, query.limit);
-
-  const createdAt = dateFilter(query);
-
-  const data = await prisma.osStage.findMany({
+export async function stageTimelineReport(context: TenantContext) {
+  return prisma.osStage.findMany({
     where: {
       tenantId: context.tenantId,
-      ...(createdAt && { createdAt }),
+      createdAt: {
+        gte: new Date(new Date().setDate(new Date().getDate() - 7)),
+        lte: new Date(),
+      },
     },
     orderBy: { updatedAt: 'desc' },
-    skip: (page - 1) * limit,
-    take: limit,
+
     select: {
+      id: true,
+      os: { select: { responsible: { select: { name: true, id: true } } } },
       osId: true,
       name: true,
+      status: true,
       createdAt: true,
       updatedAt: true,
     },
   });
-
-  return {
-    data,
-    pagination: {
-      page,
-      limit,
-      total: data.length,
-      totalPages: Math.ceil(data.length / limit),
-    },
-  };
 }
 
 export async function userProductivityReport(

@@ -13,6 +13,7 @@ import { generateRandomPassword } from '../../utils/generateRandomPassword';
 import bcrypt from 'bcrypt';
 import { Prisma } from '@prisma/client';
 import { passwordSchema } from '../../schemas/validPasswordSchema';
+import { normalizePagination } from '../../utils/normalizePagination';
 
 export async function createUser(context: TenantContext, dto: CreateUserDTO) {
   Permissions.assertAdminPrivileges(context);

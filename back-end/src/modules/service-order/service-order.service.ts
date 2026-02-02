@@ -17,6 +17,7 @@ import {
   OsQueryList,
   TenantOsItem,
 } from './types';
+import { normalizePagination } from '../../utils/normalizePagination';
 
 export async function createOs(
   context: TenantContext,
