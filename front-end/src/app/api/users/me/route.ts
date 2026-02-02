@@ -26,3 +26,33 @@ export async function GET() {
     user,
   });
 }
+
+export async function PUT(req: Request) {
+  const body = await req.json();
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth_token")?.value;
+
+  if (!token) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const response = await fetch(`${process.env.BACKEND_URL}/users/me`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    return NextResponse.json(
+      { message: data.message ?? "Erro ao atualizar usuário" },
+      { status: response.status },
+    );
+  }
+
+  return NextResponse.json(data);
+}
