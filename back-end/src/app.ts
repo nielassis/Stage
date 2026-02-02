@@ -17,6 +17,7 @@ import { usersRoutes } from './modules/users/users.routes';
 import { serviceOrderRoutes } from './modules/service-order/service-order.routes';
 import { osStagesRoutes } from './modules/service-order-stage/service-order-stage.routes';
 import { reportsRoutes } from './modules/reports/reports.routes';
+import { customersRoutes } from './modules/customers/customer.routes';
 
 const app = fastify({
   logger: true,
@@ -78,6 +79,7 @@ app.register(
       privateApi.register(serviceOrderRoutes);
       privateApi.register(osStagesRoutes);
       privateApi.register(reportsRoutes);
+      privateApi.register(customersRoutes);
     });
   },
   { prefix: '/api' },
