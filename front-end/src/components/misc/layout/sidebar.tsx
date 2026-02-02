@@ -11,7 +11,6 @@ import {
   Building2,
   ContactRound,
   FileText,
-  Menu,
   LogOut,
   EllipsisVertical,
 } from "lucide-react";
@@ -86,12 +85,17 @@ export function Sidebar({
         </div>
 
         <nav className="flex-1 overflow-y-auto py-4 px-2 lg:px-4 space-y-0.5 text-sm font-medium">
+          <p className="text-muted-foreground text-xs my-2">Menu principal</p>
           {!me
             ? Array.from({ length: 6 }).map((_, i) => (
                 <Skeleton key={i} className="h-8 w-full rounded-md my-1" />
               ))
             : sidebarNavItems.map((item, index) => {
-                const isActive = pathname.startsWith(item.href);
+                const isActive =
+                  item.href === "/dashboard"
+                    ? pathname === "/dashboard"
+                    : pathname.startsWith(item.href);
+
                 const Icon = item.icon;
 
                 if (
@@ -132,7 +136,7 @@ export function Sidebar({
               className="flex items-center gap-3 w-full hover:bg-muted rounded-md p-2 transition"
             >
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="h-8 w-8 text-xs">
+                <AvatarFallback className="h-8 w-8 text-xs bg-muted-foreground/70">
                   {getAvatarLetters(me.name)}
                 </AvatarFallback>
               </Avatar>
@@ -162,12 +166,6 @@ export function Sidebar({
             onClick={() => toogleNavbarOpen(true)}
           >
             <EllipsisVertical className="h-5 w-5" />
-          </button>
-          <button
-            className="fixed bottom-4 right-4 z-50 p-3 rounded-full shadow-md bg-primary text-white md:hidden"
-            onClick={() => toogleNavbarOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
           </button>
         </>
       )}
