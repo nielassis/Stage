@@ -41,7 +41,7 @@ const sidebarNavItems = [
     title: "Clientes",
     href: "/dashboard/customers",
     icon: ContactRound,
-    minRole: UserRole.COLLABORATOR,
+    minRole: UserRole.ADMIN,
   },
   {
     title: "Os",
@@ -53,7 +53,7 @@ const sidebarNavItems = [
     title: "Relatórios",
     href: "/dashboard/reports",
     icon: BarChart,
-    minRole: UserRole.SUPERVISOR,
+    minRole: UserRole.COLLABORATOR,
   },
   {
     title: "Empresa",
