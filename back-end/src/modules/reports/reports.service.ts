@@ -143,6 +143,7 @@ export async function stageTimelineReport(context: TenantContext) {
       },
     },
     orderBy: { updatedAt: 'desc' },
+    take: 5,
 
     select: {
       id: true,
