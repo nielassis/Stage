@@ -37,6 +37,15 @@ export type StageItem = {
   notes?: string;
 };
 
+export type StageDetailsItem = StageItem & {
+  approvedAt?: string;
+  rejectedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  approvedBy?: string;
+  rejectedBy?: string;
+};
+
 export type SearchForOsAndStage = {
   osId: string;
   stageId: string;

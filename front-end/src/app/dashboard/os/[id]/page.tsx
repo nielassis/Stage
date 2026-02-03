@@ -184,23 +184,25 @@ export default function OsDetailPage() {
               <p className="text-muted-foreground">Nenhuma etapa cadastrada</p>
             ) : (
               osStages.map((stage, idx) => (
-                <Card
-                  className="flex flex-row justify-between items-center p-2 cursor-pointer hover:bg-background/80"
+                <Link
                   key={stage.id}
+                  href={`/dashboard/os/${id}/stage/${stage.id}`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full ml-2 flex items-center justify-center font-bold bg-gray-100 p-4 text-xs">
-                      {idx + 1}
+                  <Card className="flex flex-row justify-between items-center p-2 cursor-pointer hover:bg-background/80">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full ml-2 flex items-center justify-center font-bold bg-gray-100 p-4 text-xs">
+                        {idx + 1}
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{stage.name}</h3>
+                        <p className="text-sm">{stage.description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-medium">{stage.name}</h3>
-                      <p className="text-sm">{stage.description}</p>
-                    </div>
-                  </div>
-                  <Badge variant={badgeDictOsStageStatus[stage.status]}>
-                    {OsStageStatusLabels[stage.status]}
-                  </Badge>
-                </Card>
+                    <Badge variant={badgeDictOsStageStatus[stage.status]}>
+                      {OsStageStatusLabels[stage.status]}
+                    </Badge>
+                  </Card>
+                </Link>
               ))
             )}
           </Card>
