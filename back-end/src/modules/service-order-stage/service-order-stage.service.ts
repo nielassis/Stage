@@ -6,7 +6,7 @@ import { cleanString } from '../../utils/cleaners';
 import { AppError } from '../../utils/error';
 import {
   CreateOsStageDTO,
-  GetOsStageDTO,  
+  GetOsStageDTO,
   RejectStageDTO,
   UpdateStageDTO,
 } from './types';
@@ -153,9 +153,21 @@ export async function approvalStage(
     throw new AppError('Stage is not pending approval', 400);
   }
 
+  const user = await prisma.user.findUnique({
+    where: { id: context.userId },
+  });
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
   const updatedStage = await prisma.osStage.update({
     where: { id: stage.id },
-    data: { status: OsStageStatus.COMPLETED },
+    data: {
+      status: OsStageStatus.COMPLETED,
+      approvedAt: new Date(),
+      approvedBy: user.name,
+    },
   });
 
   return updatedStage;
@@ -197,9 +209,22 @@ export async function rejectStage(
     throw new AppError('Stage is not pending approval', 400);
   }
 
+  const user = await prisma.user.findUnique({
+    where: { id: context.userId },
+  });
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
   const updatedStage = await prisma.osStage.update({
     where: { id: stage.id },
-    data: { status: OsStageStatus.REJECTED, notes },
+    data: {
+      status: OsStageStatus.REJECTED,
+      notes,
+      rejectedBy: user.name,
+      rejectedAt: new Date(),
+    },
   });
 
   return updatedStage;
@@ -261,4 +286,20 @@ export async function deleteStage(
   });
 
   return 'successfully deleted';
+}
+
+export async function getStageById(context: TenantContext, dto: GetOsStageDTO) {
+  const stage = await prisma.osStage.findUnique({
+    where: {
+      id: dto.id,
+      osId: dto.osId,
+      tenantId: context.tenantId,
+    },
+  });
+
+  if (!stage) {
+    throw new AppError('Stage not found', 404);
+  }
+
+  return stage;
 }
