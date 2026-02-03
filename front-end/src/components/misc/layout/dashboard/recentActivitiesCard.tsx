@@ -61,7 +61,7 @@ export function RecentActivitiesCard() {
   }
 
   return (
-    <Card className="flex flex-col gap-6 rounded-xl border py-6 w-full">
+    <Card className="flex flex-col gap-6 rounded-xl border py-6 w-full h-full overflow-hidden">
       <div className="px-6">
         <h2 className="text-base font-semibold">Atividades Recentes</h2>
         <p className="text-sm text-muted-foreground">
@@ -69,7 +69,7 @@ export function RecentActivitiesCard() {
         </p>
       </div>
 
-      <div className="px-6 space-y-2">
+      <div className="px-6 space-y-2 flex-1 min-h-0 overflow-y-auto">
         {activities?.length ? (
           activities.map((activity, index) => (
             <div key={activity.id}>

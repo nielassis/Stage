@@ -10,7 +10,7 @@
     "build": "npm run generate && tsc"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node src/scripts/seed.ts"
   },
   "repository": {
     "type": "git",

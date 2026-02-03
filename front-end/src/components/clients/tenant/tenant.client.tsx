@@ -2,14 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import {
-  Building2,
-  Mail,
-  FileText,
-  Hash,
-  Calendar,
-  LucideIcon,
-} from "lucide-react";
+import { FileText, Hash, Calendar, LucideIcon } from "lucide-react";
 import { Badge, BadgeProps } from "../../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Label } from "../../ui/label";

@@ -168,7 +168,7 @@ export function Sidebar({
               </Avatar>
               <div className="flex-1 flex flex-col">
                 <span className="font-medium text-sm">{me.name}</span>
-                <span className="text-xs text-muted-foreground truncate">
+                <span className="text-[10px] text-muted-foreground block">
                   {me.email}
                 </span>
               </div>

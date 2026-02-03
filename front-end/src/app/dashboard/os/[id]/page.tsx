@@ -170,14 +170,14 @@ export default function OsDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-4 flex-1">
         <Card className="lg:col-span-2 px-4">
-          <div className="flex justify-between items-center px-4 mb-2">
+          <div className="flex justify-between items-center px-4">
             <h2 className="text-xl font-semibold">Etapas</h2>
             <Link href={`/dashboard/os/${id}/stage/new`}>
               <Button size="sm">+ Nova Etapa</Button>
             </Link>
           </div>
 
-          <Card className="lg:col-span-2 px-4 flex-1 border-none shadow-none space-y-2">
+          <Card className="lg:col-span-2 px-4 flex-1 border-none shadow-none">
             {stagesLoading ? (
               <Skeleton className="h-20 w-full rounded-md" />
             ) : osStages.length === 0 ? (
@@ -185,11 +185,11 @@ export default function OsDetailPage() {
             ) : (
               osStages.map((stage, idx) => (
                 <Card
-                  className="flex flex-row justify-between items-center p-3 cursor-pointer hover:bg-background/80"
+                  className="flex flex-row justify-between items-center p-2 cursor-pointer hover:bg-background/80"
                   key={stage.id}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full flex items-center justify-center font-bold bg-gray-100">
+                    <div className="h-10 w-10 rounded-full ml-2 flex items-center justify-center font-bold bg-gray-100 p-4 text-xs">
                       {idx + 1}
                     </div>
                     <div>
@@ -232,61 +232,78 @@ export default function OsDetailPage() {
               />
             </div>
           </Card>
-
           <Card className="px-4">
-            <h2 className="text-xl font-semibold">Ações</h2>
-            <Button
-              variant="default"
-              className="w-full"
-              disabled={me.id === os.responsible?.id}
-              onClick={handleJoin}
-            >
-              {actionLoading === "join" ? (
-                <Loader />
-              ) : (
-                <CheckCircle2 className="h-4 w-4 mr-2" />
+            <h2 className="text-xl font-semibold mb-2">Ações</h2>
+
+            <div className="flex flex-col gap-1">
+              <Button
+                variant="link"
+                className="w-full border-primary border-2 text-primary hover:bg-muted-foreground/80 hover:text-white"
+                disabled={
+                  me.id === os.responsible?.id ||
+                  (osUsers.find((user) => user.id === me.id) as
+                    | OsListUser
+                    | undefined) !== undefined ||
+                  os.status === OsStatus.CLOSED ||
+                  os.status === OsStatus.CANCELLED ||
+                  actionLoading === "join"
+                }
+                onClick={handleJoin}
+              >
+                {actionLoading === "join" ? (
+                  <Loader />
+                ) : (
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                )}
+                Participar da OS
+              </Button>
+
+              {(me.role === UserRole.ADMIN ||
+                me.role === UserRole.PLATFORM_ADMIN ||
+                me.role === UserRole.SUPERVISOR) && (
+                <>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleClose}
+                    disabled={
+                      actionLoading === "close" ||
+                      os.status === OsStatus.CLOSED ||
+                      os.status === OsStatus.CANCELLED
+                    }
+                  >
+                    {actionLoading === "close" ? (
+                      <Loader />
+                    ) : (
+                      <CheckCheck className="h-4 w-4 mr-2" />
+                    )}
+                    Fechar OS
+                  </Button>
+
+                  <Button
+                    variant="destructive"
+                    className="w-full bg-transparent text-destructive hover:bg-destructive/80 border-destructive border-2"
+                    onClick={handleCancel}
+                    disabled={
+                      actionLoading === "cancel" ||
+                      os.status === OsStatus.CLOSED ||
+                      os.status === OsStatus.CANCELLED
+                    }
+                  >
+                    {actionLoading === "cancel" ? (
+                      <Loader />
+                    ) : (
+                      <X className="h-4 w-4 mr-2" />
+                    )}
+                    Cancelar OS
+                  </Button>
+                </>
               )}
-              Participar da OS
-            </Button>
-
-            {(me.role === UserRole.ADMIN ||
-              me.role === UserRole.PLATFORM_ADMIN ||
-              me.role === UserRole.SUPERVISOR) && (
-              <>
-                <Button
-                  variant="outline"
-                  className="w-full mt-2"
-                  onClick={handleClose}
-                  disabled={actionLoading === "close"}
-                >
-                  {actionLoading === "close" ? (
-                    <Loader />
-                  ) : (
-                    <CheckCheck className="h-4 w-4 mr-2" />
-                  )}
-                  Fechar OS
-                </Button>
-
-                <Button
-                  variant="destructive"
-                  className="w-full mt-2"
-                  onClick={handleCancel}
-                  disabled={actionLoading === "cancel"}
-                >
-                  {actionLoading === "cancel" ? (
-                    <Loader />
-                  ) : (
-                    <X className="h-4 w-4 mr-2" />
-                  )}
-                  Cancelar OS
-                </Button>
-              </>
-            )}
+            </div>
           </Card>
         </div>
       </div>
 
-      {/* Usuários */}
       <p className="mt-6 text-muted-foreground">
         Usuários relacionados à ordem de serviço
       </p>

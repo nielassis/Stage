@@ -1,5 +1,4 @@
 import { Customer } from "@/src/utils/customers/types";
-import { formatDateDDMMYY } from "@/src/utils/ui/formatDate";
 
 export default function CustomerDetails({ customer }: { customer: Customer }) {
   return (
@@ -19,11 +18,6 @@ export default function CustomerDetails({ customer }: { customer: Customer }) {
         <p className="font-medium">
           {customer.documentType} • {customer.document}
         </p>
-      </div>
-
-      <div>
-        <span className="text-sm text-muted-foreground">Criado em</span>
-        <p className="font-medium">{formatDateDDMMYY(customer.createdAt)}</p>
       </div>
     </div>
   );

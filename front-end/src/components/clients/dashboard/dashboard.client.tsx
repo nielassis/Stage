@@ -22,6 +22,7 @@ export default function DashboardClientPage() {
     async function fetchStats() {
       try {
         const data = await fetchOsStatus();
+        console.log(data);
         setStats(data);
       } catch (err) {
         console.error(err);
@@ -31,6 +32,8 @@ export default function DashboardClientPage() {
 
     fetchStats();
   }, []);
+
+  const totalOs = stats?.reduce((acc, cur) => acc + cur.total, 0) ?? 0;
 
   const cardsConfig = [
     {
@@ -46,7 +49,7 @@ export default function DashboardClientPage() {
       iconColor: "text-primary",
     },
     {
-      status: "COMPLETED",
+      status: "CLOSED",
       label: "Concluídas",
       icon: CheckCircle2,
       iconColor: "text-success",
@@ -65,12 +68,16 @@ export default function DashboardClientPage() {
         {stats === undefined
           ? cardsConfig.map((card) => <KpiCardSkeleton key={card.status} />)
           : cardsConfig.map((card) => {
-              const stat = stats.find((s) => s.status === card.status);
+              const value =
+                card.status === "TOTAL"
+                  ? totalOs
+                  : (stats.find((s) => s.status === card.status)?.total ?? 0);
+
               return (
                 <KpiCard
                   key={card.status}
                   label={card.label}
-                  value={stat?.total ?? 0}
+                  value={value}
                   icon={card.icon}
                   iconColor={card.iconColor}
                 />

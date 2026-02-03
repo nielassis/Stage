@@ -60,7 +60,6 @@ export default function CustomerPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex gap-2 items-center">
           <Link href="/dashboard/customers">
@@ -94,7 +93,6 @@ export default function CustomerPage() {
         )}
       </div>
 
-      {/* Tabs */}
       <Card className="p-4">
         <Tabs defaultValue="details">
           <TabsList>

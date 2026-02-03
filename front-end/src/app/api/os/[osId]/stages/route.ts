@@ -42,7 +42,7 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ osId: string }> },
+  { params }: { params: { osId: string } },
 ) {
   const { osId } = await params;
 
@@ -53,30 +53,25 @@ export async function POST(
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  try {
-    const body = await req.json();
+  const body = await req.json();
 
-    const response = await fetch(`${BACKEND_URL}/os/${osId}/stages`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
+  const response = await fetch(`${BACKEND_URL}/os/${osId}/stages`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
 
-    const data = await response.json();
+  const data = await response.json();
 
-    if (!response.ok) {
-      return NextResponse.json(
-        { message: data.message || "Erro ao criar etapa" },
-        { status: response.status },
-      );
-    }
-
-    return NextResponse.json(data);
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ message: "Erro interno" }, { status: 500 });
+  if (!response.ok) {
+    return NextResponse.json(
+      { message: data.message || "Erro ao criar etapa" },
+      { status: response.status },
+    );
   }
+
+  return NextResponse.json(data);
 }

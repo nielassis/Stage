@@ -29,6 +29,8 @@ export default function OsClient() {
 
   const [data, setData] = useState<TenantOsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [searchInput, setSearchInput] = useState(
     searchParams.get("name") ?? "",
   );
@@ -45,6 +47,8 @@ export default function OsClient() {
         name: searchInput || undefined,
       };
       const res = await listOs(query);
+      setTotalPages(res.pagination.totalPages);
+      setTotalRecords(res.pagination.total);
       setData(res.data);
     } finally {
       setLoading(false);
@@ -69,6 +73,12 @@ export default function OsClient() {
   function clearFilter() {
     router.push("?");
     setSearchInput("");
+  }
+
+  function goToPage(targetPage: number) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(targetPage));
+    router.push(`?${params.toString()}`);
   }
 
   return (
@@ -150,6 +160,26 @@ export default function OsClient() {
                 </div>
               </Card>
             ))}
+        <div className="flex justify-between items-center mt-6">
+          <span className="text-sm text-muted-foreground">
+            Mostrando {data.length} de {totalRecords}
+          </span>
+
+          <div className="flex gap-2 items-center">
+            <Button disabled={page <= 1} onClick={() => goToPage(page - 1)}>
+              Anterior
+            </Button>
+            <span className="text-sm">
+              Página {page} de {totalPages}
+            </span>
+            <Button
+              disabled={page >= totalPages}
+              onClick={() => goToPage(page + 1)}
+            >
+              Próxima
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
