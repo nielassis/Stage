@@ -162,7 +162,7 @@ export function Sidebar({
               className="flex items-center gap-3 w-full hover:bg-muted rounded-md p-2 transition"
             >
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="h-8 w-8 text-xs bg-muted-foreground/70">
+                <AvatarFallback className="h-8 w-8 text-xs bg-primary/50 text-primary">
                   {getAvatarLetters(me.name)}
                 </AvatarFallback>
               </Avatar>
