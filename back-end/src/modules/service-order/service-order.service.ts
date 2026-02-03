@@ -18,6 +18,7 @@ import {
   TenantOsItem,
 } from './types';
 import { normalizePagination } from '../../utils/normalizePagination';
+import { GetOsStageDTO } from '../service-order-stage/types';
 
 export async function createOs(
   context: TenantContext,
@@ -488,23 +489,4 @@ export async function closeOs(context: TenantContext, dto: GetOsDTO) {
   });
 
   return closedOs;
-}
-
-export async function getOsById(context: TenantContext, dto: GetOsDTO) {
-  const os = await prisma.os.findUnique({
-    where: {
-      tenantId: context.tenantId,
-      id: dto.id,
-    },
-    include: {
-      responsible: true,
-      customer: true,
-    },
-  });
-
-  if (!os) {
-    throw new AppError('Os not found', 404);
-  }
-
-  return os;
 }

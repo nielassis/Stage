@@ -12,7 +12,6 @@ import {
   listOs,
   cancelOs,
   closeOs,
-  getOsById,
 } from './service-order.service';
 
 import { CreateOsDTO, GetOsDTO, MyOsQueryList, OsQueryList } from './types';
@@ -174,29 +173,6 @@ export async function serviceOrderRoutes(app: FastifyInstance) {
         );
 
         return sendJsonSafe(reply, page);
-      },
-    );
-
-    panel.get<{ Params: GetOsDTO }>(
-      '/os/:id',
-      {
-        schema: {
-          params: osParamsJsonSchema,
-        },
-      },
-      async (request, reply) => {
-        const user = request.authUserPayload as AuthUserPayload;
-
-        const os = await getOsById(
-          {
-            tenantId: user.tenantId,
-            userId: user.userId,
-            role: user.role,
-          },
-          request.params,
-        );
-
-        return sendJsonSafe(reply, os);
       },
     );
 

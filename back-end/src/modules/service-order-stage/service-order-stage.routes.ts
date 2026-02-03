@@ -11,6 +11,7 @@ import {
   rejectStage,
   updateStage,
   deleteStage,
+  getStageById,
 } from './service-order-stage.service';
 import { osStageParamsJsonSchema } from './schemas/osStageParams.schema';
 import { createOsStageBodyJsonSchema } from './schemas/createOsStage.schema';
@@ -51,6 +52,32 @@ export async function osStagesRoutes(app: FastifyInstance) {
         );
 
         return sendJsonSafe(reply, stage);
+      },
+    );
+
+    panel.get<{ Params: GetOsStageDTO }>(
+      '/os/:osId/stages/:id',
+      {
+        schema: {
+          params: osStageParamsJsonSchema,
+        },
+      },
+      async (request, reply) => {
+        const user = request.authUserPayload as AuthUserPayload;
+
+        const stages = await getStageById(
+          {
+            tenantId: user.tenantId,
+            userId: user.userId,
+            role: user.role,
+          },
+          {
+            osId: request.params.osId,
+            id: request.params.id,
+          },
+        );
+
+        return sendJsonSafe(reply, stages);
       },
     );
 
