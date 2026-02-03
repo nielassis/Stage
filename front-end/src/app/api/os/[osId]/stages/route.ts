@@ -42,7 +42,7 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { osId: string } },
+  { params }: { params: Promise<{ osId: string }> },
 ) {
   const { osId } = await params;
 
